@@ -15,8 +15,10 @@ use craft\base\Plugin;
 use craft\events\DefineFieldHtmlEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\TemplateEvent;
+use craft\fields\PlainText;
 use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
+use craft\htmlfield\HtmlField;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use craft\web\View;
@@ -109,10 +111,17 @@ class BuddyPlugin extends Plugin
 				$settings = BuddyPlugin::getInstance()->getSettings();
 
 				if (
-					array_key_exists($event->sender->id, $settings->enabledFields)
-					&& $settings->enabledFields[$event->sender->id]
-					&& $settings->apiToken
-				){
+                    		    (
+                        	        (
+                            		    array_key_exists($event->sender->id, $settings->enabledFields)
+                            		    && $settings->enabledFields[$event->sender->id]
+                        		)
+                        		|| $event->sender instanceof PlainText
+                        		|| $event->sender instanceof HtmlField
+                    		    )
+
+                    		    && $settings->apiToken
+                		){
 					$event->html .= Craft::$app->view->renderTemplate('convergine-contentbuddy/_select.twig',
 						[ 'event' => $event, 'hash' => StringHelper::UUID()] );
 				}
